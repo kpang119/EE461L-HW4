@@ -5,4 +5,5 @@
     <string name="hello_world">Hello world!</string>
     <string name="find">Find</string>
     <string name="hint">Enter Place</string>
+    <string name="API_KEY">AIzaSyDwRuuzco89eGiV43F8IxL1l0yEUKH4UeM</string>
 </resources>

@@ -50,6 +50,18 @@ public class MainActivity extends FragmentActivity {
         // Getting reference to the Google Map
         mMap = mapFragment.getMap();
 
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+            @Override
+            public void onMapLongClick(LatLng point) {
+                String url = "https://maps.googleapis.com/maps/api/geocode/json?";
+                String ltlng = "latlng=" + point.latitude+","+point.longitude;
+                url = url + ltlng;
+                DownloadTask downloadTask = new DownloadTask("latlong");
+                downloadTask.execute(url);
+            }
+        });
+
         // Getting reference to EditText
         etPlace = (EditText) findViewById(R.id.et_place);
 
@@ -84,7 +96,7 @@ public class MainActivity extends FragmentActivity {
 
                 // Instantiating DownloadTask to get places from Google Geocoding service
                 // in a non-ui thread
-                DownloadTask downloadTask = new DownloadTask();
+                DownloadTask downloadTask = new DownloadTask("address");
 
                 // Start downloading the geocoding places
                 downloadTask.execute(url);
@@ -130,9 +142,9 @@ public class MainActivity extends FragmentActivity {
     }
     /** A class, to download Places from Geocoding webservice */
     private class DownloadTask extends AsyncTask<String, Integer, String>{
-
+        String type;
         String data = null;
-
+        DownloadTask(String t){type = t;}
         // Invoked by execute() method of this object
         @Override
         protected String doInBackground(String... url) {
@@ -147,10 +159,9 @@ public class MainActivity extends FragmentActivity {
         // Executed after the complete execution of doInBackground() method
         @Override
         protected void onPostExecute(String result){
-
             // Instantiating ParserTask which parses the json data from Geocoding webservice
             // in a non-ui thread
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(type);
 
             // Start parsing the places in JSON format
             // Invokes the "doInBackground()" method of the class ParseTask
@@ -160,9 +171,9 @@ public class MainActivity extends FragmentActivity {
 
     /** A class to parse the Geocoding Places in non-ui thread */
     class ParserTask extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
-
+        String type;
         JSONObject jObject;
-
+        ParserTask(String t){type = t;}
         // Invoked by execute() method of this object
         @Override
         protected List<HashMap<String,String>> doInBackground(String... jsonData) {
@@ -188,8 +199,10 @@ public class MainActivity extends FragmentActivity {
 
             // Clears all the existing markers
             mMap.clear();
-
-            for(int i=0;i<list.size();i++){
+            int length;
+            if(type.equals("address")){length = list.size();}
+            else{length = 1;}
+            for(int i=0;i<length;i++){
 
                 // Creating a marker
                 MarkerOptions markerOptions = new MarkerOptions();
